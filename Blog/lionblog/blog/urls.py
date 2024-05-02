@@ -1,11 +1,8 @@
-from django.urls import path
-from .views import *
-
-app_name = 'contacts'
+from django.urls import path, include
+from .views import list, create, detail, update, delete
 
 urlpatterns = [
-    path('', IndexView.as_view(), name='list'),
-    path('result/', result, name="result"),
+    path('', list, name = "list"),
     path('create/', create, name = "create"),
     path('detail/<int:id>', detail, name = "detail"),
     path('update/<int:id>', update, name = "update"),
