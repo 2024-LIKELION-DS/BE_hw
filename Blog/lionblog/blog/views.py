@@ -1,21 +1,11 @@
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Post
-from django.db.models import Q
 # Create your views here.
+
 
 def list(request):
     posts = Post.objects.all().order_by('-id')
-    return render(request, 'posts/list.html', {'posts': posts})
-
-
-def result(request):
-    if 'data' in request.GET:
-        post = request.GET['data']
-        posts = Post.objects.filter( Q(title__contains=post) | Q(content__contains=post)).order_by('-id')
-    else:
-        posts = Post.objects.all().order_by('-id')
-
-    return render(request, 'posts/search.html', {'data': post, 'posts': posts})
+    return render(request, 'blog/list.html', {'posts': posts})
 
 
 def create(request):
@@ -29,15 +19,11 @@ def create(request):
         )
 
         return redirect('list')
-    return render(request, 'posts/create.html')
+    return render(request, 'blog/create.html')
 
 def detail(request, id):
     post = get_object_or_404(Post, id = id)
-
-    post.count += 1
-    post.save()
-
-    return render(request, 'posts/detail.html', {'post' :post})
+    return render(request, 'blog/detail.html', {'post' :post})
 
 def update(request, id):
     post = get_object_or_404(Post, id = id)
@@ -46,11 +32,13 @@ def update(request, id):
         post.content = request.POST.get('content')
         post.save()
         return redirect('detail', id)
-    return render(request, 'posts/update.html', {'post' :post})
+    return render(request, 'blog/update.html', {'post' :post})
     
 
 def delete(request, id):
     post = get_object_or_404(Post, id = id)
     post.delete()
     return redirect('list')
+    
+
 
