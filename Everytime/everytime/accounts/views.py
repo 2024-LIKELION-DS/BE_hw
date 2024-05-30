@@ -22,13 +22,13 @@ def login_view(request):
     form = AuthenticationForm(request, data = request.POST)
     if form.is_valid():
         login(request, form.user_cache) # form 변수에 저장된 유저 정보로 로그인시킨 뒤, 사용자를 메인 페이지로 이동시킴
-        return redirect('blog:list')
+        return redirect('post:list')
     return render(request, 'accounts/login.html', {'form' : form})
 
 def logout_view(request):
     if request.user.is_authenticated: # 사용자가 로그인 상태라면
         logout(request)
-    return redirect('blog:list')
+    return redirect('post:list')
 
 def mypage(request):
     return render(request, 'accounts/mypage.html')
@@ -36,6 +36,6 @@ def mypage(request):
 def user_info(request):
     return render(request, 'accounts/user-info.html')
 
-def myblog(request): # 역참조
+def mypost(request): # 역참조
     posts = request.user.posts.all().order_by('-id')
-    return render(request, 'accounts/myblog.html', {'posts' : posts})
+    return render(request, 'accounts/mypost.html', {'posts' : posts})
