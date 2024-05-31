@@ -33,8 +33,12 @@ def logout_view(request):
         logout(request)
     return redirect('post:list')
 
-# def mypage(request):
-#     return render(request, 'accounts/mypage.html')
+def mypage(request):
+    return render(request, 'accounts/mypage.html')
 
-# def user_info(request):
-#     return render(request, 'accounts/user-info.html')
+def user_info(request):
+    return render(request, 'accounts/user-info.html')
+
+def myblog(request):
+    posts = request.user.posts.all().order_by('-id')
+    return render(request, 'accounts/myblog.html', {'posts' : posts})
