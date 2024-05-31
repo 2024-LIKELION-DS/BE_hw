@@ -6,9 +6,13 @@
     <title>Document</title>
   </head>
   <body>
+    <!-- 카테고리 -->
+    {% for category in categories %}
+    <a href="{% url 'post:create' category.slug %}">{{ category.title }}</a>
+    {% endfor %}
+    <br>
     <!-- 로그인 상태 -->
     {% if request.user.is_authenticated %}
-    카테고리<br>
     nickname: {{ user }}
     <hr>
     <a href="#">마이페이지</a>
@@ -21,26 +25,18 @@
 
     <hr>
     <a href="{% url 'accounts:my-blog' %}">내가 작성한 글</a>
-    <a href="#">내가 스크랩한 글</a>
+    <a href="{% url 'accounts:my-scrap' %}">내가 스크랩한 글</a>
     <hr>
 
-    <!-- 글 작성 (여기 url은 실제 html 페이지 존재와 상관X)-->
-    <form method="POST" action="{% url 'post:create' %}">
-      {% csrf_token %} <input type="text" name="title" /><br />
-      <textarea name="content"></textarea>
-      <input type="checkbox" name="anonymity" />익명<br />
-      <input type="submit" value="작성 완료" />
-    </form>
-
-    <hr />
-    <!-- 글 리스트 -->
+    {% for category, posts in category_posts.items %}
+    <h2><a href="{% url 'post:create' category.slug %}">{{ category.title }}</a></h2>
+    <!-- 카테고리에 해당하는 최신 글 리스트 -->
     {% for post in posts %}
-    <h2><a href="{% url 'post:detail' post.id %}"> {{ post.title }} </a></h2>
-    <p>{{ post.content }}</p>
-    <p>{% load humanize %} {{ post.created_at|naturaltime }}</p>
-
+        <a href="{% url 'post:detail' post.id %}"> {{ post.title }} </a><br>
     {% empty %}
-    <h1>글이 없습니다.</h1>
+    글이 없습니다.
     {% endfor %}
+    {% endfor %}
+    <br>
   </body>
 </html>

@@ -3,12 +3,23 @@ from .models import *
 from django.contrib.auth.decorators import login_required
 
 def list(request):
-   posts = Post.objects.all().order_by('-id')
-   return  render(request, 'post/list.html', {'posts' : posts})
+    categories = Category.objects.all()
+    
+    category_posts = {}
+    for category in categories:
+        posts = category.posts.order_by('-created_at')[:4]
+        category_posts[category] = posts
+       
+    return  render(request, 'post/list.html', {'category_posts': category_posts, 'categories' : categories})
 
 @login_required
-def create(request):
-    if request.method == "POST":
+def create(request, slug): 
+    categories = Category.objects.all()
+    # url에서 전돨된 slug를 이용해 특정 카테고리 가져옴
+    category = get_object_or_404(Category, slug=slug)
+    posts = category.posts.all().order_by('-id')
+
+    if request.method == "POST":     
         title = request.POST.get('title')
         content = request.POST.get('content')
         anonymity = request.POST.get('anonymity')
@@ -25,12 +36,14 @@ def create(request):
             anonymity = anonymity,
             author = request.user,
         )
+
+        post.category.add(category)
+
         return redirect('post:list')
-    return render(request, 'post/list.html')
+    return render(request, 'post/create.html', {'categories' : categories, 'category' : category, 'posts' : posts})
 
 def detail(request, id):
     post = get_object_or_404(Post, id = id)
-
     return render(request, 'post/detail.html', {'post' : post})
 
 @login_required
@@ -49,6 +62,7 @@ def delete(request, id):
     post.delete()
     return redirect('post:list')
 
+@login_required
 def create_comment(request, post_id):
     post = get_object_or_404(Post, id = post_id)
     if request.method == "POST":
@@ -67,3 +81,34 @@ def create_comment(request, post_id):
             post = post,
         )
         return redirect('post:detail', post_id)
+
+@login_required
+def delete_comment(request, post_id, comment_id):
+    comment = get_object_or_404(Comment, id = comment_id)
+    comment.delete()
+    return redirect('post:detail', post_id)
+
+@login_required
+def add_like(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    post.like.add(request.user)
+    return redirect('post:detail', post_id)
+
+@login_required
+def remove_like(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    post.like.remove(request.user)
+    return redirect('post:detail', post_id)
+
+@login_required
+def add_scrap(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    post.scrap.add(request.user)
+    return redirect('post:detail', post_id)
+
+@login_required
+def remove_scrap(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    post.scrap.remove(request.user)
+    return redirect('post:detail', post_id)
+
