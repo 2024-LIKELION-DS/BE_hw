@@ -1,5 +1,13 @@
 from django.db import models
 from user.models import User
+import os
+from uuid import uuid4
+from django.utils import timezone
+
+def upload_filepath(instance, filename):
+    today_str = timezone.now().strftime("%Y%m%d")
+    file_basename = os.path.basename(filename)
+    return f'{instance._meta.model_name}/{today_str}/{str(uuid4())}_{file_basename}'
 
 # 카테고리
 class Category(models.Model):
@@ -18,6 +26,9 @@ class Post(models.Model):
     author = models.ForeignKey(to = User, on_delete = models.CASCADE, related_name = "posts")
     category = models.ManyToManyField(to = Category, through="PostCategory", related_name="posts")
     like = models.ManyToManyField(to = User, through="Like", related_name="liked_posts")
+    scrap = models.ManyToManyField(to = User, through="Scrap", related_name="scrap_posts")
+    image = models.ImageField(upload_to = upload_filepath, blank = True)
+    video = models.FileField(upload_to = upload_filepath, blank = True)
 
     # 제목을 title로 변경하기
     def __str__(self):
@@ -26,6 +37,10 @@ class Post(models.Model):
 class Like(models.Model):
     post = models.ForeignKey(to = Post, on_delete = models.CASCADE, related_name="post_likes")
     user = models.ForeignKey(to = User, on_delete = models.CASCADE, related_name="user_likes")
+
+class Scrap(models.Model):
+    post = models.ForeignKey(to = Post, on_delete = models.CASCADE, related_name="post_scrap")
+    user = models.ForeignKey(to = User, on_delete = models.CASCADE, related_name="user_scrap")
 
 # 중간테이블
 class PostCategory(models.Model):
